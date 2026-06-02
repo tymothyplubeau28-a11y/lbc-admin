@@ -1,14 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const db = require('./db');
+const pool = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Credentials admin
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin5252';
 
@@ -16,12 +16,10 @@ const ADMIN_PASS = 'admin5252';
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// Multer - upload photos
 const storage = multer.diskStorage({
   destination: uploadsDir,
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
@@ -29,18 +27,16 @@ const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
-  secret: 'lbc-secret-2024',
+  secret: process.env.SESSION_SECRET || 'lbc-secret-2024',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 8 * 60 * 60 * 1000 }
 }));
 
-// Fichiers statiques
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/uploads', express.static(uploadsDir));
 
-// Middleware auth
 function requireAuth(req, res, next) {
   if (req.session.loggedIn) return next();
   res.redirect('/');
@@ -58,25 +54,21 @@ app.post('/', (req, res) => {
     req.session.loggedIn = true;
     return res.redirect('/dashboard');
   }
-  res.send(`<!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Connexion</title>
-<link rel="stylesheet" href="/css/style.css"></head>
-<body class="login-body">
-<div class="login-logo">
-  <img src="/images/logo.png" alt="leboncoin" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-  <span class="login-logo-text" style="display:none">leboncoin</span>
-</div>
-<div class="login-container">
-  <h2>Espace Admin</h2>
-  <div class="error-message">Identifiant ou mot de passe incorrect.</div>
-  <form method="POST" action="/">
-    <input type="text" name="username" placeholder="Identifiant" required autocomplete="off">
-    <input type="password" name="password" placeholder="Mot de passe" required>
-    <button type="submit" class="btn-red">Se connecter</button>
-  </form>
-</div></body></html>`);
+  res.send(buildPage('Admin - Connexion', `
+    <body class="login-body">
+    <div class="login-logo">
+      <img src="/images/logo.png" alt="leboncoin" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="login-logo-text" style="display:none">leboncoin</span>
+    </div>
+    <div class="login-container">
+      <h2>Espace Admin</h2>
+      <div class="error-message">Identifiant ou mot de passe incorrect.</div>
+      <form method="POST" action="/">
+        <input type="text" name="username" placeholder="Identifiant" required autocomplete="off">
+        <input type="password" name="password" placeholder="Mot de passe" required>
+        <button type="submit" class="btn-red">Se connecter</button>
+      </form>
+    </div>`, true));
 });
 
 // ===== DASHBOARD =====
@@ -91,48 +83,56 @@ app.get('/logout', (req, res) => {
 });
 
 // ===== ANNONCES - liste =====
-app.get('/annonces', requireAuth, (req, res) => {
-  const annonces = db.prepare('SELECT * FROM annonces ORDER BY created_at DESC').all();
-  const cards = annonces.length === 0
-    ? `<div class="empty-state">Aucune annonce pour le moment.</div>`
-    : annonces.map(a => `
-      <div class="annonce-card">
-        <div class="card-image">
-          ${a.photo
-            ? `<img src="/uploads/${a.photo}" alt="${a.titre}">`
-            : `<div class="no-image">Pas de photo</div>`}
-        </div>
-        <div class="card-content">
-          <div class="annonce-header">
-            <span class="title">${a.titre}</span>
-            <span class="subtitle">${a.marque || ''} ${a.modele || ''}</span>
+app.get('/annonces', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM annonces ORDER BY created_at DESC');
+    const cards = rows.length === 0
+      ? `<div class="empty-state">Aucune annonce pour le moment.</div>`
+      : rows.map(a => `
+        <div class="annonce-card">
+          <div class="card-image">
+            ${a.photo
+              ? `<img src="/uploads/${a.photo}" alt="${esc(a.titre)}">`
+              : `<div class="no-image">Pas de photo</div>`}
           </div>
-          <div class="details">${a.categorie || ''}, ${a.kilometrage ? a.kilometrage + ' km' : ''}, ${a.annee || ''}</div>
-          ${a.prix ? `<div class="price">${a.prix} €</div>` : ''}
-          <div class="actions">
-            <a href="/annonce-form?id=${a.id}" class="btn-text-red">Modifier</a>
-            <a href="/delete/${a.id}" class="btn-text-red" onclick="return confirm('Supprimer cette annonce ?')">Supprimer</a>
+          <div class="card-content">
+            <div class="annonce-header">
+              <span class="title">${esc(a.titre)}</span>
+              <span class="subtitle">${esc(a.marque || '')} ${esc(a.modele || '')}</span>
+            </div>
+            <div class="details">${esc(a.categorie || '')}, ${a.kilometrage ? esc(a.kilometrage) + ' km' : ''}, ${esc(a.annee || '')}</div>
+            ${a.prix ? `<div class="price">${esc(a.prix)} €</div>` : ''}
+            <div class="actions">
+              <a href="/annonce-form?id=${a.id}" class="btn-text-red">Modifier</a>
+              <a href="/delete/${a.id}" class="btn-text-red" onclick="return confirm('Supprimer cette annonce ?')">Supprimer</a>
+            </div>
           </div>
-        </div>
-      </div>`).join('');
+        </div>`).join('');
 
-  res.send(buildPage('Annonces', `
-    <div class="app">
-      <div class="top-bar">
-        <a href="/dashboard" class="back">← Retour</a>
-        <a href="/annonce-form" class="add">+ Annonce</a>
-      </div>
-      <div class="annonces-list">${cards}</div>
-    </div>`));
+    res.send(buildPage('Annonces', `
+      <div class="app">
+        <div class="top-bar">
+          <a href="/dashboard" class="back">← Retour</a>
+          <a href="/annonce-form" class="add">+ Annonce</a>
+        </div>
+        <div class="annonces-list">${cards}</div>
+      </div>`));
+  } catch (err) {
+    res.send(`Erreur: ${err.message}`);
+  }
 });
 
 // ===== FORMULAIRE ANNONCE =====
-app.get('/annonce-form', requireAuth, (req, res) => {
+app.get('/annonce-form', requireAuth, async (req, res) => {
   const id = req.query.id;
-  const a = id ? db.prepare('SELECT * FROM annonces WHERE id = ?').get(id) : null;
-  const v = (field) => a ? (a[field] || '') : '';
-  const title = a ? 'Modifier l\'annonce' : 'Ajouter une annonce';
-  const btnLabel = a ? 'Enregistrer les modifications' : 'Ajouter l\'annonce';
+  let a = null;
+  if (id) {
+    const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [id]);
+    a = rows[0] || null;
+  }
+  const v = f => a ? esc(a[f] || '') : '';
+  const title = a ? "Modifier l'annonce" : 'Ajouter une annonce';
+  const btnLabel = a ? 'Enregistrer les modifications' : "Ajouter l'annonce";
 
   res.send(buildPage(title, `
     <div class="app">
@@ -210,35 +210,44 @@ app.get('/annonce-form', requireAuth, (req, res) => {
     </script>`));
 });
 
-app.post('/annonce-form', requireAuth, upload.single('photo'), (req, res) => {
+app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) => {
   const id = req.query.id;
   const fields = ['titre','marque','modele','prix','description','annee','kilometrage',
                   'code_postal','region','ville','vendeur','membre_depuis','categorie',
                   'titulaire_rib','iban','bic','assistant_name'];
   const data = {};
   fields.forEach(f => data[f] = req.body[f] || '');
-
   if (req.file) data.photo = req.file.filename;
 
-  if (id) {
-    const setCols = Object.keys(data).map(k => `${k} = ?`).join(', ');
-    db.prepare(`UPDATE annonces SET ${setCols} WHERE id = ?`).run(...Object.values(data), id);
-  } else {
-    const cols = Object.keys(data).join(', ');
-    const placeholders = Object.keys(data).map(() => '?').join(', ');
-    db.prepare(`INSERT INTO annonces (${cols}) VALUES (${placeholders})`).run(...Object.values(data));
+  try {
+    if (id) {
+      const cols = Object.keys(data).map((k, i) => `${k} = $${i + 1}`).join(', ');
+      await pool.query(
+        `UPDATE annonces SET ${cols} WHERE id = $${Object.keys(data).length + 1}`,
+        [...Object.values(data), id]
+      );
+    } else {
+      const cols = Object.keys(data).join(', ');
+      const placeholders = Object.keys(data).map((_, i) => `$${i + 1}`).join(', ');
+      await pool.query(
+        `INSERT INTO annonces (${cols}) VALUES (${placeholders})`,
+        Object.values(data)
+      );
+    }
+    res.redirect('/annonces');
+  } catch (err) {
+    res.send(`Erreur: ${err.message}`);
   }
-  res.redirect('/annonces');
 });
 
 // ===== SUPPRESSION =====
-app.get('/delete/:id', requireAuth, (req, res) => {
-  const a = db.prepare('SELECT photo FROM annonces WHERE id = ?').get(req.params.id);
-  if (a && a.photo) {
-    const filePath = path.join(uploadsDir, a.photo);
+app.get('/delete/:id', requireAuth, async (req, res) => {
+  const { rows } = await pool.query('SELECT photo FROM annonces WHERE id = $1', [req.params.id]);
+  if (rows[0]?.photo) {
+    const filePath = path.join(uploadsDir, rows[0].photo);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
-  db.prepare('DELETE FROM annonces WHERE id = ?').run(req.params.id);
+  await pool.query('DELETE FROM annonces WHERE id = $1', [req.params.id]);
   res.redirect('/annonces');
 });
 
@@ -247,8 +256,21 @@ app.get('/parametres', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'parametres.html'));
 });
 
-// ===== HELPER HTML =====
-function buildPage(title, content) {
+// ===== HELPERS =====
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function buildPage(title, content, noNavbar = false) {
+  const navbar = noNavbar ? '' : `
+  <div class="navbar">
+    <img src="/images/logo.png" alt="leboncoin" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="navbar-logo-text" style="display:none">leboncoin</span>
+  </div>`;
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -258,10 +280,7 @@ function buildPage(title, content) {
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <img src="/images/logo.png" alt="leboncoin" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-    <span class="navbar-logo-text" style="display:none">leboncoin</span>
-  </div>
+  ${navbar}
   ${content}
 </body>
 </html>`;

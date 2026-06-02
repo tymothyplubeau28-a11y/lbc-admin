@@ -1,31 +1,41 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+require('dotenv').config();
+const { Pool } = require('pg');
 
-const db = new Database(path.join(__dirname, 'data.sqlite'));
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS annonces (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    titre TEXT NOT NULL,
-    marque TEXT,
-    modele TEXT,
-    prix TEXT,
-    description TEXT,
-    annee TEXT,
-    kilometrage TEXT,
-    code_postal TEXT,
-    region TEXT,
-    ville TEXT,
-    vendeur TEXT,
-    membre_depuis TEXT,
-    categorie TEXT DEFAULT 'Voitures',
-    titulaire_rib TEXT,
-    iban TEXT,
-    bic TEXT,
-    assistant_name TEXT,
-    photo TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-`);
+async function init() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS annonces (
+      id SERIAL PRIMARY KEY,
+      titre TEXT NOT NULL,
+      marque TEXT,
+      modele TEXT,
+      prix TEXT,
+      description TEXT,
+      annee TEXT,
+      kilometrage TEXT,
+      code_postal TEXT,
+      region TEXT,
+      ville TEXT,
+      vendeur TEXT,
+      membre_depuis TEXT,
+      categorie TEXT DEFAULT 'Voitures',
+      titulaire_rib TEXT,
+      iban TEXT,
+      bic TEXT,
+      assistant_name TEXT,
+      photo TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+  console.log('✅ Base de données connectée (Neon PostgreSQL)');
+}
 
-module.exports = db;
+init().catch(err => {
+  console.error('❌ Erreur DB:', err.message);
+});
+
+module.exports = pool;
