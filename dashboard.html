@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Dashboard Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <img src="images/logo.png" alt="leboncoin" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span class="navbar-logo-text" style="display:none">leboncoin</span>
+    </div>
+
+    <div class="dashboard">
+        <div class="header">
+            <div class="time" id="clock"></div>
+            <div class="status">Admin</div>
+        </div>
+
+        <div class="menu">
+            <a href="annonces.html" class="menu-item">📋 Les annonces</a>
+            <a href="annonce-form.html" class="menu-item">🏦 Les RIB</a>
+            <a href="parametres.html" class="menu-item">⚙️ Paramètres</a>
+            <a href="index.html" class="menu-item">🚪 Déconnexion</a>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent =
+                now.getHours().toString().padStart(2,'0') + ':' +
+                now.getMinutes().toString().padStart(2,'0');
+        }
+        updateClock();
+        setInterval(updateClock, 10000);
+    </script>
+</body>
+</html>

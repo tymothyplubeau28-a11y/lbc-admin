@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ajouter une annonce</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <img src="images/logo.png" alt="leboncoin" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span class="navbar-logo-text" style="display:none">leboncoin</span>
+    </div>
+
+    <div class="app">
+        <div class="top-bar">
+            <a href="dashboard.html" class="back">← Retour</a>
+            <a href="annonces.html" class="add">Annonces</a>
+        </div>
+
+        <form class="annonce-form" method="POST" enctype="multipart/form-data">
+
+            <h3>📋 Annonce</h3>
+
+            <div class="form-group">
+                <label>Titre</label>
+                <input type="text" name="titre" placeholder="Ex: Renault Clio 2020 – 45 000 km">
+            </div>
+            <div class="form-group">
+                <label>Marque</label>
+                <input type="text" name="marque" placeholder="Ex: Renault">
+            </div>
+            <div class="form-group">
+                <label>Modèle</label>
+                <input type="text" name="modele" placeholder="Ex: Clio">
+            </div>
+            <div class="form-group">
+                <label>Prix (€)</label>
+                <input type="text" name="prix" placeholder="Ex: 12 500">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" placeholder="Décrivez le véhicule..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Année</label>
+                <input type="text" name="annee" placeholder="Ex: 2020">
+            </div>
+            <div class="form-group">
+                <label>Kilométrage</label>
+                <input type="text" name="kilometrage" placeholder="Ex: 45 000">
+            </div>
+
+            <h3>📍 Localisation & Vendeur</h3>
+
+            <div class="form-group">
+                <label>Code postal</label>
+                <input type="text" name="code_postal" placeholder="Ex: 75001">
+            </div>
+            <div class="form-group">
+                <label>Région</label>
+                <input type="text" name="region" placeholder="Ex: Île-de-France">
+            </div>
+            <div class="form-group">
+                <label>Vendeur</label>
+                <input type="text" name="vendeur" placeholder="Nom du vendeur">
+            </div>
+            <div class="form-group">
+                <label>📅 Membre depuis</label>
+                <input type="text" name="membre_depuis" placeholder="Ex: 2021, janvier 2020, 5 ans">
+                <small>Ancienneté du compte vendeur</small>
+            </div>
+            <div class="form-group">
+                <label>Ville</label>
+                <input type="text" name="ville" placeholder="Ex: Paris">
+            </div>
+            <div class="form-group">
+                <label>Catégorie</label>
+                <input type="text" name="categorie" value="Voitures">
+            </div>
+
+            <h3>🏦 RIB associé</h3>
+
+            <div class="form-group">
+                <label>Titulaire du compte</label>
+                <input type="text" name="titulaire_rib" placeholder="Nom Prénom">
+            </div>
+            <div class="form-group">
+                <label>IBAN</label>
+                <input type="text" name="iban" placeholder="FR76 0000 0000 0000 0000 0000 000">
+            </div>
+            <div class="form-group">
+                <label>BIC</label>
+                <input type="text" name="bic" placeholder="Ex: BNPAFRPP">
+            </div>
+            <div class="form-group">
+                <label>👤 Nom de l'assistant(e) Leboncoin</label>
+                <input type="text" name="assistant_name" placeholder="Ex: Jean DUPONT">
+                <small>⚠️ Ce nom apparaîtra comme bénéficiaire sur le virement de l'acheteur</small>
+            </div>
+
+            <h3>📷 Photos</h3>
+
+            <div class="file-input-wrapper">
+                <label for="photos" class="file-input-label">+ Choisir les photos</label>
+                <input type="file" name="photos[]" id="photos" accept="image/*" multiple>
+            </div>
+            <div id="new-photos-preview" class="photos-preview"></div>
+
+            <button type="submit" class="btn-blue">Ajouter l'annonce</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('photos')?.addEventListener('change', function() {
+            const preview = document.getElementById('new-photos-preview');
+            preview.innerHTML = '';
+            for (let i = 0; i < this.files.length; i++) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'photo-item';
+                    div.innerHTML = `<img src="${e.target.result}" alt="Aperçu">`;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(this.files[i]);
+            }
+        });
+
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            const titre = document.querySelector('input[name="titre"]').value.trim();
+            const prix = document.querySelector('input[name="prix"]').value.trim();
+            if (!titre) { e.preventDefault(); alert('Le titre est obligatoire'); return; }
+            if (!prix) { e.preventDefault(); alert('Le prix est obligatoire'); return; }
+        });
+    </script>
+</body>
+</html>

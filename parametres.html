@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Paramètres - Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <img src="images/logo.png" alt="leboncoin" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span class="navbar-logo-text" style="display:none">leboncoin</span>
+    </div>
+
+    <div class="dashboard">
+        <div class="header">
+            <div class="time" id="clock"></div>
+            <div class="status">Admin</div>
+        </div>
+
+        <div class="settings-container">
+            <h2>🔐 Paramètres du compte</h2>
+
+            <div class="info-box">
+                👋 Connecté en tant que : <strong>admin</strong>
+            </div>
+
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="current_password">Mot de passe actuel</label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Nouveau mot de passe</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                    <small>Minimum 6 caractères</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirmer le mot de passe</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="btn-update">Mettre à jour</button>
+            </form>
+
+            <a href="dashboard.html" class="back-link">← Retour au tableau de bord</a>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent =
+                now.getHours().toString().padStart(2,'0') + ':' +
+                now.getMinutes().toString().padStart(2,'0');
+        }
+        updateClock();
+        setInterval(updateClock, 10000);
+    </script>
+</body>
+</html>
