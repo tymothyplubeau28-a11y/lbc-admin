@@ -1,5 +1,5 @@
 const express = require('express');
-const session = require('express-session');
+const session = require('cookie-session');
 const multer = require('multer');
 const path = require('path');
 const { put, del } = require('@vercel/blob');
@@ -16,10 +16,11 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
+  name: 'lbc_session',
   secret: process.env.SESSION_SECRET || 'lbc-secret-2024',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 8 * 60 * 60 * 1000 }
+  maxAge: 8 * 60 * 60 * 1000,
+  secure: process.env.NODE_ENV === 'production',
+  httpOnly: true,
 }));
 
 app.use('/css', express.static(path.join(__dirname, 'css')));
@@ -67,7 +68,7 @@ app.get('/dashboard', requireAuth, (req, res) => {
 
 // ===== LOGOUT =====
 app.get('/logout', (req, res) => {
-  req.session.destroy();
+  req.session = null;
   res.redirect('/');
 });
 
