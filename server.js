@@ -141,7 +141,7 @@ app.get('/annonce-form', requireAuth, async (req, res) => {
       </div>
       <form class="annonce-form" method="POST" action="/annonce-form${a ? '?id=' + a.id : ''}" enctype="multipart/form-data">
 
-        <h3>📋 Annonce</h3>
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:8px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg> Annonce</h3>
         <div class="form-group"><label>Titre</label>
           <input type="text" name="titre" value="${v('titre')}" placeholder="Ex: Renault Clio 2020 – 45 000 km" required></div>
         <div class="form-group"><label>Marque</label>
@@ -157,14 +157,14 @@ app.get('/annonce-form', requireAuth, async (req, res) => {
         <div class="form-group"><label>Kilométrage</label>
           <input type="text" name="kilometrage" value="${v('kilometrage')}" placeholder="Ex: 45 000"></div>
 
-        <h3>📍 Localisation & Vendeur</h3>
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Localisation & Vendeur</h3>
         <div class="form-group"><label>Code postal</label>
           <input type="text" name="code_postal" value="${v('code_postal')}" placeholder="Ex: 75001"></div>
         <div class="form-group"><label>Région</label>
           <input type="text" name="region" value="${v('region')}" placeholder="Ex: Île-de-France"></div>
         <div class="form-group"><label>Vendeur</label>
           <input type="text" name="vendeur" value="${v('vendeur')}" placeholder="Nom du vendeur"></div>
-        <div class="form-group"><label>📅 Membre depuis</label>
+        <div class="form-group"><label><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Membre depuis</label>
           <input type="text" name="membre_depuis" value="${v('membre_depuis')}" placeholder="Ex: 2021">
           <small>Ancienneté du compte vendeur</small></div>
         <div class="form-group"><label>Ville</label>
@@ -172,18 +172,18 @@ app.get('/annonce-form', requireAuth, async (req, res) => {
         <div class="form-group"><label>Catégorie</label>
           <input type="text" name="categorie" value="${v('categorie') || 'Voitures'}"></div>
 
-        <h3>🏦 RIB associé</h3>
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:8px"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 10l9-6 9 6"/><line x1="9" y1="14" x2="9" y2="16"/><line x1="12" y1="14" x2="12" y2="16"/><line x1="15" y1="14" x2="15" y2="16"/></svg> RIB associé</h3>
         <div class="form-group"><label>Titulaire du compte</label>
           <input type="text" name="titulaire_rib" value="${v('titulaire_rib')}" placeholder="Nom Prénom"></div>
         <div class="form-group"><label>IBAN</label>
           <input type="text" name="iban" value="${v('iban')}" placeholder="FR76 0000 ..."></div>
         <div class="form-group"><label>BIC</label>
           <input type="text" name="bic" value="${v('bic')}" placeholder="Ex: BNPAFRPP"></div>
-        <div class="form-group"><label>👤 Nom de l'assistant(e) Leboncoin</label>
+        <div class="form-group"><label><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Nom de l'assistant(e) Leboncoin</label>
           <input type="text" name="assistant_name" value="${v('assistant_name')}" placeholder="Ex: Jean DUPONT">
-          <small>⚠️ Ce nom apparaîtra comme bénéficiaire sur le virement</small></div>
+          <small><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ce nom apparaîtra comme bénéficiaire sur le virement</small></div>
 
-        <h3>📷 Photo principale</h3>
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Photo principale</h3>
         ${a && a.photo ? `<div class="photos-preview"><div class="photo-item"><img src="${a.photo}" alt="Photo actuelle"></div></div>` : ''}
         <div class="file-input-wrapper">
           <label for="photo" class="file-input-label">+ Choisir une photo</label>
@@ -265,8 +265,8 @@ app.get('/parametres', requireAuth, (req, res) => {
   res.send(buildPage('Paramètres', `
     <div class="dashboard">
       <div class="settings-container">
-        <h2>🔐 Paramètres du compte</h2>
-        <div class="info-box">👋 Connecté en tant que : <strong>admin</strong></div>
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:8px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Paramètres du compte</h2>
+        <div class="info-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v4l3 3"/></svg> Connecté en tant que : <strong>admin</strong></div>
         <form method="POST" action="/parametres">
           <div class="form-group"><label>Mot de passe actuel</label><input type="password" name="current_password" required></div>
           <div class="form-group"><label>Nouveau mot de passe</label><input type="password" name="new_password" required><small style="color:#666;display:block;margin-top:5px">Minimum 6 caractères</small></div>
@@ -293,8 +293,8 @@ app.post('/parametres', requireAuth, async (req, res) => {
   res.send(buildPage('Paramètres', `
     <div class="dashboard">
       <div class="settings-container">
-        <h2>🔐 Paramètres du compte</h2>
-        <div class="info-box">👋 Connecté en tant que : <strong>admin</strong></div>
+        <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:8px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Paramètres du compte</h2>
+        <div class="info-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v4l3 3"/></svg> Connecté en tant que : <strong>admin</strong></div>
         ${msg}
         <form method="POST" action="/parametres">
           <div class="form-group"><label>Mot de passe actuel</label><input type="password" name="current_password" required></div>
@@ -331,7 +331,7 @@ app.get('/annonce/:id', async (req, res) => {
             </svg>
           </button>
         </div>
-        <button class="btn-voir-photos" onclick="openLightbox(0)">📷 Voir la photo</button>
+        <button class="btn-voir-photos" onclick="openLightbox(0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Voir la photo</button>
       </div>`
     : `<div class="main-photo-container" style="background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:18px;">Pas de photo</div>`;
 
@@ -865,9 +865,9 @@ app.get('/finaliser/:id', async (req, res) => {
         </div>
 
         <div class="vendeur-box">
-          <strong>📌 Informations virement</strong>
+          <strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Informations virement</strong>
           <div class="nom-box">
-            <span style="font-size:12px;color:#555">📋 Nom et Prénom(s) de la carte grise :</span>
+            <span style="font-size:12px;color:#555"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:8px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg> Nom et Prénom(s) de la carte grise :</span>
             <span style="font-weight:600;color:#f56b2a"> ${esc(prenom||'')} ${esc((nom||'').toUpperCase())}</span>
             <p style="margin-top:8px;color:#666;font-size:13px">S'il y a eu négociation avec le vendeur, vous pouvez adapter le montant total à virer en conséquence dans les étapes suivantes.</p>
             <div class="ref"><strong>Référence annonce :</strong> ${ref}</div>
