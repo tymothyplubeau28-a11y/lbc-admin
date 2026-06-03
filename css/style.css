@@ -6,10 +6,10 @@
 }
 
 :root {
-    --orange: #f56b2a;
-    --orange-dark: #d95a1e;
-    --orange-light: #fff3ee;
-    --grey-light: #f5f5f5;
+    --orange: #FF8C00;
+    --orange-dark: #E67E00;
+    --orange-light: #FFF3E0;
+    --grey-light: #f8f8f8;
     --grey-border: #e8e8e8;
     --text-dark: #1a1a1a;
     --text-grey: #6a6a6a;
@@ -28,7 +28,7 @@ body {
 
 /* ===== HEADER / NAVBAR ===== */
 .navbar {
-    background: var(--orange);
+    background: #fff;
     padding: 12px 20px;
     display: flex;
     align-items: center;
@@ -36,15 +36,15 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(245, 107, 42, 0.3);
+    border-bottom: 1px solid #f0f0f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .navbar img {
-    height: 32px;
+    height: 36px;
     width: auto;
-    filter: brightness(0) invert(1);
 }
 .navbar-logo-text {
-    color: white;
+    color: var(--orange);
     font-size: 26px;
     font-weight: 900;
     letter-spacing: -0.5px;
@@ -64,7 +64,7 @@ body {
     text-align: center;
 }
 .login-logo img {
-    height: 40px;
+    height: 44px;
     width: auto;
 }
 .login-logo-text {

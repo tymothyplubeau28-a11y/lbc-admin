@@ -337,12 +337,14 @@ app.get('/annonce/:id', async (req, res) => {
       </div>`
     : `<div class="main-photo-container" style="background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:18px;">Pas de photo</div>`;
 
+  const datePosted = new Date(a.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+
   res.send(`<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-  <title>${esc(a.titre)} - Annonce</title>
+  <title>${esc(a.titre)} - leboncoin</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { background: white; }
@@ -1062,14 +1064,15 @@ function sharedStyle() {
 }
 
 function sharedHeader(backUrl = '') {
-  return `<header class="header">
+  return `<header class="header" style="background:#fff;border-bottom:3px solid #FF8C00;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 4px rgba(0,0,0,.05)">
   <button class="icon-btn" onclick="${backUrl ? `location.href='${backUrl}'` : 'history.back()'}" aria-label="Retour">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
   <div style="display:flex;align-items:center;gap:10px">
-    <span class="logo">leboncoin</span>
-    <span class="secure-badge">|
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 0L2 3V7C2 11 5 14 8 16C11 14 14 11 14 7V3L8 0Z" fill="#4A90E2"/></svg>
+    <img src="/images/logo.png" alt="leboncoin" style="height:28px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span style="display:none;color:#FF8C00;font-weight:900;font-size:20px;letter-spacing:-.5px">leboncoin</span>
+    <span style="color:#4b5563;font-size:13px;display:flex;align-items:center;gap:4px">|
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 0L2 3V7C2 11 5 14 8 16C11 14 14 11 14 7V3L8 0Z" fill="#4A90E2"/></svg>
       Achat sécurisé
     </span>
   </div>
