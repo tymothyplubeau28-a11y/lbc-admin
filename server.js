@@ -13,6 +13,7 @@ const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 // Photos en mémoire puis upload vers Vercel Blob
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
+app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
