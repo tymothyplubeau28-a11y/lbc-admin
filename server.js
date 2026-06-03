@@ -3,13 +3,12 @@ const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
 const { put, del } = require('@vercel/blob');
-const { readAll, writeAll } = require('./db');
+const { readAll, writeAll, getAdminPass, setAdminPass } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin5252';
 
 // Photos en mémoire puis upload vers Vercel Blob
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -37,8 +36,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
   const { username, password } = req.body;
+  const ADMIN_PASS = await getAdminPass();
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     req.session.loggedIn = true;
     return res.redirect('/dashboard');
@@ -268,13 +268,17 @@ app.get('/parametres', requireAuth, (req, res) => {
     </div>`));
 });
 
-app.post('/parametres', requireAuth, (req, res) => {
+app.post('/parametres', requireAuth, async (req, res) => {
   const { current_password, new_password, confirm_password } = req.body;
+  const ADMIN_PASS = await getAdminPass();
   let msg = '';
   if (current_password !== ADMIN_PASS) msg = '<div class="error-message">Mot de passe actuel incorrect.</div>';
   else if (new_password.length < 6)   msg = '<div class="error-message">Le nouveau mot de passe doit faire au moins 6 caractères.</div>';
   else if (new_password !== confirm_password) msg = '<div class="error-message">Les mots de passe ne correspondent pas.</div>';
-  else msg = '<div style="color:#2e7d32;padding:12px;background:#e8f5e9;border-radius:8px;margin-bottom:16px">✅ Mot de passe mis à jour. Pensez à le modifier dans le code.</div>';
+  else {
+    await setAdminPass(new_password);
+    msg = '<div style="color:#2e7d32;padding:12px;background:#e8f5e9;border-radius:8px;margin-bottom:16px">✅ Mot de passe mis à jour avec succès.</div>';
+  }
 
   res.send(buildPage('Paramètres', `
     <div class="dashboard">
