@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const multer = require('multer');
@@ -253,7 +252,45 @@ app.get('/delete/:id', requireAuth, async (req, res) => {
 
 // ===== PARAMÈTRES =====
 app.get('/parametres', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'parametres.html'));
+  res.send(buildPage('Paramètres', `
+    <div class="dashboard">
+      <div class="settings-container">
+        <h2>🔐 Paramètres du compte</h2>
+        <div class="info-box">👋 Connecté en tant que : <strong>admin</strong></div>
+        <form method="POST" action="/parametres">
+          <div class="form-group"><label>Mot de passe actuel</label><input type="password" name="current_password" required></div>
+          <div class="form-group"><label>Nouveau mot de passe</label><input type="password" name="new_password" required><small style="color:#666;display:block;margin-top:5px">Minimum 6 caractères</small></div>
+          <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" name="confirm_password" required></div>
+          <button type="submit" class="btn-update">Mettre à jour</button>
+        </form>
+        <a href="/dashboard" class="back-link">← Retour au tableau de bord</a>
+      </div>
+    </div>`));
+});
+
+app.post('/parametres', requireAuth, (req, res) => {
+  const { current_password, new_password, confirm_password } = req.body;
+  let msg = '';
+  if (current_password !== ADMIN_PASS) msg = '<div class="error-message">Mot de passe actuel incorrect.</div>';
+  else if (new_password.length < 6)   msg = '<div class="error-message">Le nouveau mot de passe doit faire au moins 6 caractères.</div>';
+  else if (new_password !== confirm_password) msg = '<div class="error-message">Les mots de passe ne correspondent pas.</div>';
+  else msg = '<div style="color:#2e7d32;padding:12px;background:#e8f5e9;border-radius:8px;margin-bottom:16px">✅ Mot de passe mis à jour. Pensez à le modifier dans le code.</div>';
+
+  res.send(buildPage('Paramètres', `
+    <div class="dashboard">
+      <div class="settings-container">
+        <h2>🔐 Paramètres du compte</h2>
+        <div class="info-box">👋 Connecté en tant que : <strong>admin</strong></div>
+        ${msg}
+        <form method="POST" action="/parametres">
+          <div class="form-group"><label>Mot de passe actuel</label><input type="password" name="current_password" required></div>
+          <div class="form-group"><label>Nouveau mot de passe</label><input type="password" name="new_password" required><small style="color:#666;display:block;margin-top:5px">Minimum 6 caractères</small></div>
+          <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" name="confirm_password" required></div>
+          <button type="submit" class="btn-update">Mettre à jour</button>
+        </form>
+        <a href="/dashboard" class="back-link">← Retour au tableau de bord</a>
+      </div>
+    </div>`));
 });
 
 // ===== PAGE PUBLIQUE ANNONCE =====
