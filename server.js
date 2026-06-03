@@ -31,6 +31,13 @@ function requireAuth(req, res, next) {
   res.redirect('/');
 }
 
+
+// ===== DEBUG (temporaire) =====
+app.get('/debug-auth', async (req, res) => {
+  const pass = await getAdminPass();
+  res.json({ storedPass: pass, env: process.env.NODE_ENV || 'none' });
+});
+
 // ===== LOGIN =====
 app.get('/', (req, res) => {
   if (req.session.loggedIn) return res.redirect('/dashboard');
