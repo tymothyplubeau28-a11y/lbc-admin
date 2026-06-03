@@ -1,41 +1,24 @@
-require('dotenv').config();
-const { Pool } = require('pg');
+const { put, get, list } = require('@vercel/blob');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+const DB_KEY = 'lbc/annonces.json';
 
-async function init() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS annonces (
-      id SERIAL PRIMARY KEY,
-      titre TEXT NOT NULL,
-      marque TEXT,
-      modele TEXT,
-      prix TEXT,
-      description TEXT,
-      annee TEXT,
-      kilometrage TEXT,
-      code_postal TEXT,
-      region TEXT,
-      ville TEXT,
-      vendeur TEXT,
-      membre_depuis TEXT,
-      categorie TEXT DEFAULT 'Voitures',
-      titulaire_rib TEXT,
-      iban TEXT,
-      bic TEXT,
-      assistant_name TEXT,
-      photo TEXT,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-  `);
-  console.log('✅ Base de données connectée (Neon PostgreSQL)');
+async function readAll() {
+  try {
+    const { blobs } = await list({ prefix: DB_KEY });
+    if (!blobs.length) return [];
+    const res = await fetch(blobs[0].url);
+    return await res.json();
+  } catch {
+    return [];
+  }
 }
 
-init().catch(err => {
-  console.error('❌ Erreur DB:', err.message);
-});
+async function writeAll(annonces) {
+  await put(DB_KEY, JSON.stringify(annonces), {
+    access: 'public',
+    allowOverwrite: true,
+    contentType: 'application/json',
+  });
+}
 
-module.exports = pool;
+module.exports = { readAll, writeAll };

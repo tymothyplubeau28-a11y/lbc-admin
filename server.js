@@ -3,9 +3,8 @@ const express = require('express');
 const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const pool = require('./db');
+const { put, del } = require('@vercel/blob');
+const { readAll, writeAll } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -13,18 +12,8 @@ const PORT = process.env.PORT || 4000;
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin5252';
 
-// Cloudinary config
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: { folder: 'lbc-annonces', allowed_formats: ['jpg','jpeg','png','webp'] }
-});
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+// Photos en mémoire puis upload vers Vercel Blob
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -86,7 +75,7 @@ app.get('/logout', (req, res) => {
 // ===== ANNONCES - liste =====
 app.get('/annonces', requireAuth, async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM annonces ORDER BY created_at DESC');
+    const rows = await readAll();
     const cards = rows.length === 0
       ? `<div class="empty-state">Aucune annonce pour le moment.</div>`
       : rows.map(a => `
@@ -126,11 +115,11 @@ app.get('/annonces', requireAuth, async (req, res) => {
 
 // ===== FORMULAIRE ANNONCE =====
 app.get('/annonce-form', requireAuth, async (req, res) => {
-  const id = req.query.id;
+  const id = req.query.id ? parseInt(req.query.id) : null;
   let a = null;
   if (id) {
-    const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [id]);
-    a = rows[0] || null;
+    const all = await readAll();
+    a = all.find(x => x.id === id) || null;
   }
   const v = f => a ? esc(a[f] || '') : '';
   const title = a ? "Modifier l'annonce" : 'Ajouter une annonce';
@@ -213,29 +202,37 @@ app.get('/annonce-form', requireAuth, async (req, res) => {
 });
 
 app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) => {
-  const id = req.query.id;
+  const id = req.query.id ? parseInt(req.query.id) : null;
   const fields = ['titre','marque','modele','prix','description','annee','kilometrage',
                   'code_postal','region','ville','vendeur','membre_depuis','categorie',
                   'titulaire_rib','iban','bic','assistant_name'];
   const data = {};
   fields.forEach(f => data[f] = req.body[f] || '');
-  if (req.file) data.photo = req.file.path; // Cloudinary URL
 
   try {
-    if (id) {
-      const cols = Object.keys(data).map((k, i) => `${k} = $${i + 1}`).join(', ');
-      await pool.query(
-        `UPDATE annonces SET ${cols} WHERE id = $${Object.keys(data).length + 1}`,
-        [...Object.values(data), id]
-      );
-    } else {
-      const cols = Object.keys(data).join(', ');
-      const placeholders = Object.keys(data).map((_, i) => `$${i + 1}`).join(', ');
-      await pool.query(
-        `INSERT INTO annonces (${cols}) VALUES (${placeholders})`,
-        Object.values(data)
-      );
+    // Upload photo vers Vercel Blob si fournie
+    if (req.file) {
+      const ext = req.file.originalname.split('.').pop();
+      const { url } = await put(`lbc/photos/${Date.now()}.${ext}`, req.file.buffer, {
+        access: 'public',
+        contentType: req.file.mimetype,
+      });
+      data.photo = url;
     }
+
+    const all = await readAll();
+    if (id) {
+      const idx = all.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        // Garde l'ancienne photo si pas de nouvelle
+        if (!data.photo) data.photo = all[idx].photo;
+        all[idx] = { ...all[idx], ...data };
+      }
+    } else {
+      const newId = all.length ? Math.max(...all.map(x => x.id)) + 1 : 1;
+      all.unshift({ id: newId, ...data, created_at: new Date().toISOString() });
+    }
+    await writeAll(all);
     res.redirect('/annonces');
   } catch (err) {
     res.send(`Erreur: ${err.message}`);
@@ -244,16 +241,13 @@ app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) 
 
 // ===== SUPPRESSION =====
 app.get('/delete/:id', requireAuth, async (req, res) => {
-  const { rows } = await pool.query('SELECT photo FROM annonces WHERE id = $1', [req.params.id]);
-  if (rows[0]?.photo) {
-    try {
-      // Extrait le public_id depuis l'URL Cloudinary
-      const url = rows[0].photo;
-      const match = url.match(/\/lbc-annonces\/([^/.]+)/);
-      if (match) await cloudinary.uploader.destroy('lbc-annonces/' + match[1]);
-    } catch (e) { /* ignore si déjà supprimé */ }
+  const id = parseInt(req.params.id);
+  const all = await readAll();
+  const a = all.find(x => x.id === id);
+  if (a?.photo) {
+    try { await del(a.photo); } catch (e) { /* ignore */ }
   }
-  await pool.query('DELETE FROM annonces WHERE id = $1', [req.params.id]);
+  await writeAll(all.filter(x => x.id !== id));
   res.redirect('/annonces');
 });
 

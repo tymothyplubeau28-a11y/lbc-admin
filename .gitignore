@@ -3,3 +3,4 @@ data.sqlite
 uploads/
 *.sqlite
 .env
+.vercel

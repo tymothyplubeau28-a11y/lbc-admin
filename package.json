@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@vercel/blob": "^2.4.0",
     "cloudinary": "^1.41.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
