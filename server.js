@@ -92,7 +92,7 @@ app.get('/annonces', requireAuth, async (req, res) => {
             <div class="details">${esc(a.categorie || '')}, ${a.kilometrage ? esc(a.kilometrage) + ' km' : ''}, ${esc(a.annee || '')}</div>
             ${a.prix ? `<div class="price">${esc(a.prix)} €</div>` : ''}
             <div class="actions">
-              <a href="/annonce/${a.id}" class="btn-text-red" target="_blank">Voir</a>
+              <a href="/annonce/${a.id}" class="btn-text-red">Voir</a>
               <a href="/annonce-form?id=${a.id}" class="btn-text-red">Modifier</a>
               <a href="/delete/${a.id}" class="btn-text-red" onclick="return confirm('Supprimer cette annonce ?')">Supprimer</a>
             </div>
