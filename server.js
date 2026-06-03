@@ -3,7 +3,7 @@ const session = require('cookie-session');
 const multer = require('multer');
 const path = require('path');
 const { put, del } = require('@vercel/blob');
-const { readAll, writeAll, getAdminPass, setAdminPass } = require('./db');
+const { readAll, writeAll, getAdminPass, setAdminPass, readDB, writeDB } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -228,11 +228,12 @@ app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) 
       data.photo = url;
     }
 
-    const all = await readAll();
+    // Lire la DB une seule fois, modifier, écrire une seule fois
+    const db = await readDB();
+    const all = db.annonces || [];
     if (id) {
       const idx = all.findIndex(x => x.id === id);
       if (idx !== -1) {
-        // Garde l'ancienne photo si pas de nouvelle
         if (!data.photo) data.photo = all[idx].photo;
         all[idx] = { ...all[idx], ...data };
       }
@@ -241,7 +242,8 @@ app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) 
       const ref = 'REF' + Math.random().toString(36).substring(2,6).toUpperCase() + Date.now().toString(36).toUpperCase().slice(-6);
       all.unshift({ id: newId, ref, ...data, created_at: new Date().toISOString() });
     }
-    await writeAll(all);
+    db.annonces = all;
+    await writeDB(db);
     res.redirect('/annonces');
   } catch (err) {
     res.send(`Erreur: ${err.message}`);

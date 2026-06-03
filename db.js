@@ -6,11 +6,9 @@ async function readDB() {
   try {
     const { blobs } = await list({ prefix: DB_KEY });
     if (!blobs.length) return { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
-    // Utilise downloadUrl pour bypasser le cache CDN
     blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-    const blob = blobs[0];
-    const url = blob.downloadUrl || blob.url;
-    const res = await fetch(url, { cache: 'no-store' });
+    const url = blobs[0].url;
+    const res = await fetch(url + '?nocache=' + Date.now());
     return await res.json();
   } catch {
     return { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
@@ -25,14 +23,20 @@ async function writeDB(data) {
   });
 }
 
+// Lit toute la DB, applique la fonction de modification, écrit en une fois
+async function updateDB(fn) {
+  const db = await readDB();
+  fn(db);
+  await writeDB(db);
+  return db;
+}
+
 async function readAll() {
   return (await readDB()).annonces || [];
 }
 
 async function writeAll(annonces) {
-  const db = await readDB();
-  db.annonces = annonces;
-  await writeDB(db);
+  await updateDB(db => { db.annonces = annonces; });
 }
 
 async function getAdminPass() {
@@ -40,9 +44,7 @@ async function getAdminPass() {
 }
 
 async function setAdminPass(newPass) {
-  const db = await readDB();
-  db.password = newPass;
-  await writeDB(db);
+  await updateDB(db => { db.password = newPass; });
 }
 
-module.exports = { readAll, writeAll, getAdminPass, setAdminPass };
+module.exports = { readAll, writeAll, getAdminPass, setAdminPass, readDB, writeDB };
