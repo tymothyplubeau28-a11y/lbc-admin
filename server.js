@@ -299,7 +299,7 @@ app.post('/parametres', requireAuth, async (req, res) => {
 
 // ===== PAGE PUBLIQUE ANNONCE =====
 app.get('/annonce/:id', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [req.params.id]);
+  const _all = await readAll(); const rows = [_all.find(x => x.id === parseInt(req.params.id))].filter(Boolean);
   const a = rows[0];
   if (!a) return res.status(404).send('Annonce introuvable');
 
@@ -469,7 +469,7 @@ app.get('/annonce/:id', async (req, res) => {
 
 // ===== PAGE RÉSERVATION INFO =====
 app.get('/reservation/:id', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [req.params.id]);
+  const _all = await readAll(); const rows = [_all.find(x => x.id === parseInt(req.params.id))].filter(Boolean);
   const a = rows[0];
   if (!a) return res.status(404).send('Annonce introuvable');
 
@@ -622,7 +622,7 @@ app.get('/reservation/:id', async (req, res) => {
 
 // ===== PAGE FORMULE =====
 app.get('/formule/:id', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [req.params.id]);
+  const _all = await readAll(); const rows = [_all.find(x => x.id === parseInt(req.params.id))].filter(Boolean);
   const a = rows[0];
   if (!a) return res.status(404).send('Annonce introuvable');
   const S = sharedStyle();
@@ -797,7 +797,7 @@ app.get('/formule/:id', async (req, res) => {
 
 // ===== PAGE FINALISER =====
 app.get('/finaliser/:id', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [req.params.id]);
+  const _all = await readAll(); const rows = [_all.find(x => x.id === parseInt(req.params.id))].filter(Boolean);
   const a = rows[0];
   if (!a) return res.status(404).send('Annonce introuvable');
   const { warranty, price, nom, prenom } = req.query;
@@ -904,7 +904,7 @@ app.get('/finaliser/:id', async (req, res) => {
 
 // ===== PAGE CONFIRMER (RIB) =====
 app.get('/confirmer/:id', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM annonces WHERE id = $1', [req.params.id]);
+  const _all = await readAll(); const rows = [_all.find(x => x.id === parseInt(req.params.id))].filter(Boolean);
   const a = rows[0];
   if (!a) return res.status(404).send('Annonce introuvable');
   const { total, warranty, nom, prenom } = req.query;
