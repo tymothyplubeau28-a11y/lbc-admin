@@ -8,7 +8,7 @@ const { readAll, writeAll, getAdminPass, setAdminPass } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const ADMIN_USER = 'admin';
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 
 // Photos en mémoire puis upload vers Vercel Blob
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });

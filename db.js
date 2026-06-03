@@ -5,7 +5,7 @@ const DB_KEY = 'lbc/data.json';
 async function readDB() {
   try {
     const { blobs } = await list({ prefix: DB_KEY });
-    if (!blobs.length) return { annonces: [], password: 'admin5252' };
+    if (!blobs.length) return { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
     // Utilise downloadUrl pour bypasser le cache CDN
     blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
     const blob = blobs[0];
@@ -13,7 +13,7 @@ async function readDB() {
     const res = await fetch(url, { cache: 'no-store' });
     return await res.json();
   } catch {
-    return { annonces: [], password: 'admin5252' };
+    return { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
   }
 }
 
@@ -36,7 +36,7 @@ async function writeAll(annonces) {
 }
 
 async function getAdminPass() {
-  return (await readDB()).password || 'admin5252';
+  return (await readDB()).password || process.env.ADMIN_PASS || 'admin5252';
 }
 
 async function setAdminPass(newPass) {
