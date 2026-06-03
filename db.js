@@ -1,4 +1,4 @@
-const { put, list } = require('@vercel/blob');
+const { put, list, del } = require('@vercel/blob');
 
 const DB_KEY = 'lbc/data.json';
 
@@ -6,7 +6,12 @@ async function readDB() {
   try {
     const { blobs } = await list({ prefix: DB_KEY });
     if (!blobs.length) return { annonces: [], password: 'admin5252' };
-    const res = await fetch(blobs[0].url + '?t=' + Date.now()); // cache-bust
+    // Trie par date décroissante pour avoir le plus récent
+    blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+    const res = await fetch(blobs[0].downloadUrl || blobs[0].url, {
+      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+      cache: 'no-store',
+    });
     return await res.json();
   } catch {
     return { annonces: [], password: 'admin5252' };
@@ -14,8 +19,15 @@ async function readDB() {
 }
 
 async function writeDB(data) {
+  // Supprime d'abord l'ancien pour éviter le cache CDN
+  try {
+    const { blobs } = await list({ prefix: DB_KEY });
+    if (blobs.length) await del(blobs.map(b => b.url));
+  } catch { /* ignore */ }
+
   await put(DB_KEY, JSON.stringify(data), {
-    access: 'public', allowOverwrite: true, contentType: 'application/json',
+    access: 'public',
+    contentType: 'application/json',
   });
 }
 
