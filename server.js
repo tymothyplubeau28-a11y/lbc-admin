@@ -229,7 +229,8 @@ app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) 
       }
     } else {
       const newId = all.length ? Math.max(...all.map(x => x.id)) + 1 : 1;
-      all.unshift({ id: newId, ...data, created_at: new Date().toISOString() });
+      const ref = 'REF' + Math.random().toString(36).substring(2,6).toUpperCase() + Date.now().toString(36).toUpperCase().slice(-6);
+      all.unshift({ id: newId, ref, ...data, created_at: new Date().toISOString() });
     }
     await writeAll(all);
     res.redirect('/annonces');
@@ -804,7 +805,7 @@ app.get('/finaliser/:id', async (req, res) => {
   const base = parseFloat((a.prix || '0').replace(/\s/g,'').replace(',','.')) || 0;
   const garantie = parseFloat(price) || 0;
   const total = (base + garantie).toFixed(2).replace('.',',');
-  const ref = 'REF' + String(a.id).padStart(2,'0') + '0000' + String(a.id).padStart(2,'0');
+  const ref = a.ref || ('REF' + String(a.id).padStart(2,'0') + '0000' + String(a.id).padStart(2,'0'));
   const S = sharedStyle();
 
   res.send(`<!DOCTYPE html>
@@ -908,7 +909,7 @@ app.get('/confirmer/:id', async (req, res) => {
   const a = rows[0];
   if (!a) return res.status(404).send('Annonce introuvable');
   const { total, warranty, nom, prenom } = req.query;
-  const ref = 'REF' + String(a.id).padStart(2,'0') + '0000' + String(a.id).padStart(2,'0');
+  const ref = a.ref || ('REF' + String(a.id).padStart(2,'0') + '0000' + String(a.id).padStart(2,'0'));
   const S = sharedStyle();
 
   res.send(`<!DOCTYPE html>
