@@ -966,16 +966,16 @@ app.get('/confirmer/:id', async (req, res) => {
       </div>
       <hr>
       <div class="bank-item">
-        <span class="bank-label">Nom de l'assistant(e) Leboncoin à renseigner comme Titulaire</span>
-        <span class="bank-value">${esc(a.assistant_name || 'Leboncoin Assistance')}</span>
+        <span class="bank-label">Titulaire du compte</span>
+        <span class="bank-value">${esc(a.titulaire_rib || a.assistant_name || 'Leboncoin Assistance')}</span>
       </div>
       <div class="bank-item">
         <span class="bank-label">IBAN</span>
-        <span class="bank-value" id="iban-val">FR7616958000014316776162050</span>
+        <span class="bank-value" id="iban-val">${esc(a.iban || '')}</span>
       </div>
       <div class="bank-item">
         <span class="bank-label">BIC</span>
-        <span class="bank-value">QNTOFRP1XXX</span>
+        <span class="bank-value">${esc(a.bic || '')}</span>
       </div>
       <div class="ref"><strong>Référence annonce :</strong> ${ref}</div>
       <button class="copy-btn" onclick="copyIBAN()">
