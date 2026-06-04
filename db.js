@@ -40,7 +40,8 @@ async function writeAll(annonces) {
 }
 
 async function getAdminPass() {
-  return (await readDB()).password || process.env.ADMIN_PASS || 'admin5252';
+  if (process.env.ADMIN_PASS) return process.env.ADMIN_PASS;
+  return (await readDB()).password || 'admin5252';
 }
 
 async function setAdminPass(newPass) {
