@@ -5,20 +5,11 @@ const DB_KEY = 'lbc/data.json';
 async function readDB() {
   try {
     const { blobs } = await list({ prefix: DB_KEY });
-    if (!blobs.length) {
-      const defaultDB = { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
-      await writeDB(defaultDB);
-      return defaultDB;
-    }
+    if (!blobs.length) return { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
     blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
     const url = blobs[0].url;
     const res = await fetch(url + '?nocache=' + Date.now());
-    const db = await res.json();
-    if (!db.password && process.env.ADMIN_PASS) {
-      db.password = process.env.ADMIN_PASS;
-      await writeDB(db);
-    }
-    return db;
+    return await res.json();
   } catch {
     return { annonces: [], password: process.env.ADMIN_PASS || 'admin5252' };
   }
@@ -32,7 +23,6 @@ async function writeDB(data) {
   });
 }
 
-// Lit toute la DB, applique la fonction de modification, écrit en une fois
 async function updateDB(fn) {
   const db = await readDB();
   fn(db);
