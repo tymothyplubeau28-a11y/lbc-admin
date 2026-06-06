@@ -966,8 +966,8 @@ app.get('/confirmer/:id', async (req, res) => {
       </div>
       <hr>
       <div class="bank-item">
-        <span class="bank-label">Titulaire du compte</span>
-        <span class="bank-value">${esc(a.titulaire_rib || a.assistant_name || 'Leboncoin Assistance')}</span>
+        <span class="bank-label">Nom de l'assistant(e) Leboncoin</span>
+        <span class="bank-value">${esc(a.assistant_name || 'Leboncoin Assistance')}</span>
       </div>
       <div class="bank-item">
         <span class="bank-label">IBAN</span>
