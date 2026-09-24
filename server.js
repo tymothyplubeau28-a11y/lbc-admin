@@ -2,7 +2,7 @@ const express = require('express');
 const session = require('cookie-session');
 const multer = require('multer');
 const path = require('path');
-const { put, del } = require('@vercel/blob');
+const { v2: cloudinary } = require('cloudinary');
 const { readAll, writeAll, getAdminPass, setAdminPass, readDB, writeDB } = require('./db');
 
 const app = express();
@@ -10,12 +10,37 @@ const PORT = process.env.PORT || 4000;
 
 const ADMIN_USER = process.env.ADMIN_USER;
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 
 if (!ADMIN_USER) throw new Error('ADMIN_USER doit être défini.');
 if (!SESSION_SECRET) throw new Error('SESSION_SECRET doit être défini.');
+if (!CLOUDINARY_CLOUD_NAME) throw new Error('CLOUDINARY_CLOUD_NAME doit être défini.');
+if (!CLOUDINARY_API_KEY) throw new Error('CLOUDINARY_API_KEY doit être défini.');
+if (!CLOUDINARY_API_SECRET) throw new Error('CLOUDINARY_API_SECRET doit être défini.');
 
-// Photos en mémoire puis upload vers Vercel Blob
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+cloudinary.config({
+  cloud_name: CLOUDINARY_CLOUD_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
+});
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith('image/')),
+});
+
+function uploadPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'lbc/photos', resource_type: 'image' },
+      (error, result) => error ? reject(error) : resolve(result),
+    );
+    stream.end(file.buffer);
+  });
+}
 
 app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
@@ -215,14 +240,11 @@ app.post('/annonce-form', requireAuth, upload.single('photo'), async (req, res) 
   fields.forEach(f => data[f] = req.body[f] || '');
 
   try {
-    // Upload photo vers Vercel Blob si fournie
+    // Upload photo vers Cloudinary si fournie
     if (req.file) {
-      const ext = req.file.originalname.split('.').pop();
-      const { url } = await put(`lbc/photos/${Date.now()}.${ext}`, req.file.buffer, {
-        access: 'public',
-        contentType: req.file.mimetype,
-      });
-      data.photo = url;
+      const photo = await uploadPhoto(req.file);
+      data.photo = photo.secure_url;
+      data.photo_public_id = photo.public_id;
     }
 
     // Lire la DB une seule fois, modifier, écrire une seule fois
@@ -252,8 +274,8 @@ app.get('/delete/:id', requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
   const all = await readAll();
   const a = all.find(x => x.id === id);
-  if (a?.photo) {
-    try { await del(a.photo); } catch (e) { /* ignore */ }
+  if (a?.photo_public_id) {
+    try { await cloudinary.uploader.destroy(a.photo_public_id); } catch (e) { /* ignore */ }
   }
   await writeAll(all.filter(x => x.id !== id));
   res.redirect('/annonces');
