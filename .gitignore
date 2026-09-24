@@ -3,4 +3,8 @@ data.sqlite
 uploads/
 *.sqlite
 .env
+.env.*
+.vercel/
+.aws/
 .vercel
+.env*

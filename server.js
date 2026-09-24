@@ -8,7 +8,11 @@ const { readAll, writeAll, getAdminPass, setAdminPass, readDB, writeDB } = requi
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_USER = process.env.ADMIN_USER;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+if (!ADMIN_USER) throw new Error('ADMIN_USER doit être défini.');
+if (!SESSION_SECRET) throw new Error('SESSION_SECRET doit être défini.');
 
 // Photos en mémoire puis upload vers Vercel Blob
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -18,14 +22,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
   name: 'lbc_session',
-  secret: process.env.SESSION_SECRET || 'lbc-secret-2024',
+  secret: SESSION_SECRET,
   maxAge: 8 * 60 * 60 * 1000,
   secure: process.env.NODE_ENV === 'production',
   httpOnly: true,
 }));
 
-app.use('/css', express.static(path.join(__dirname, 'css')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 
 function requireAuth(req, res, next) {
   if (req.session.loggedIn) return next();
@@ -966,7 +970,7 @@ app.get('/confirmer/:id', async (req, res) => {
       </div>
       <hr>
       <div class="bank-item">
-        <span class="bank-label">Nom de l'assistant(e) Leboncoin</span>
+        <span class="bank-label">Nom de l'assistant(e) Leboncoin (à utiliser comme bénéficiaire du virement)</span>
         <span class="bank-value">${esc(a.assistant_name || 'Leboncoin Assistance')}</span>
       </div>
       <div class="bank-item">
@@ -1118,6 +1122,10 @@ function buildPage(title, content, noNavbar = false) {
 </html>`;
 }
 
-app.listen(PORT, () => {
-  console.log(`✅ Serveur démarré : http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`✅ Serveur démarré : http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
